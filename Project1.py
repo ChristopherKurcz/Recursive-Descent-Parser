@@ -149,12 +149,12 @@ class Parser:
             else:
                 self.error("Syntax error: expecting KEYWORD with value </i>; saw:")
         elif self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "<ul>":
-            print(self.token.getTokenValue())
+            print(indentation + self.token.getTokenValue())
             self.token = self.lexer.nextToken()
             while self.token.getTokenValue() != "</ul>" or self.token.getTokenType() not in [STRING, KEYWORD]:
                 self.listItem(indentVal+1)
             if self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "</ul>":
-                print(self.token.getTokenValue())
+                print(indentation + self.token.getTokenValue())
                 self.token = self.lexer.nextToken()
             else:
                 self.error("Syntax error: expecting KEYWORD with value </ul>; saw:")
@@ -204,15 +204,7 @@ while (tk.getTokenType() != EOI):
 print("")
 
 print("Testing the lexer: test 3")
-lex = Lexer ("/<body>  <underline> underline </underline><i>indent<i/>bodyend</body>$")
-tk = lex.nextToken()
-while (tk.getTokenType() != EOI):
-    print(tk)
-    tk = lex.nextToken()
-print("")
-
-print("Testing the lexer: test 4")
-lex = Lexer ("/,>.<<body<i>>123</</body><body/>bruh$")
+lex = Lexer ("!<body> apple <underline>bottom</underline> <i>jeans</i> </body>$")
 tk = lex.nextToken()
 while (tk.getTokenType() != EOI):
     print(tk)
@@ -221,4 +213,12 @@ print("")
 
 print("Testing the parser: test 1")
 parser = Parser ("<body> google <b><i><b> yahoo</b></i></b></body>")
+parser.run()
+
+print("Testing the parser: test 2")
+parser = Parser ("<body> <b>Fall2022SemesterClasses</b> <ul><li>GEOG2N</li><li>CMPSC461</li><li>CMPSC465</li><li>STAT318</li><li>CMPEN331</li></ul> </body>")
+parser.run()
+
+print("Testing the parser: test 3")
+parser = Parser ("<body>goodbye<kill>")
 parser.run()
