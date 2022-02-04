@@ -21,12 +21,10 @@ class Token:
         return self.val
 
     def __repr__(self):
-        if (self.type == STRING):
+        if self.type in [STRING, KEYWORD]:
             return self.val
-        elif (self.type == KEYWORD):
-            return self.val
-        elif (self.type == EOI):
-            return 
+        elif self.type == EOI:
+            return ""
         else:
             return "invalid"
 
