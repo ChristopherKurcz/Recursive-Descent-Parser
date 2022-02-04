@@ -24,7 +24,7 @@ class Token:
         if (self.type == STRING):
             return self.val
         elif (self.type == KEYWORD):
-            return "<"+self.val+">"
+            return self.val
         elif (self.type == EOI):
             return 
         else:
@@ -50,7 +50,7 @@ class Lexer:
                         id = self.consumeChars(LETTERS)
                         if id in KEYWORDS:
                             if self.checkChar(">"):
-                                return Token(KEYWORD, "/"+id)
+                                return Token(KEYWORD, "</"+id+">")
                             else:
                                 self.nextChar()
                                 return Token(INVALID, self.ch)
@@ -63,7 +63,7 @@ class Lexer:
                     id = self.consumeChars(LETTERS)
                     if id in KEYWORDS:
                         if self.checkChar(">"):
-                            return Token(KEYWORD, id)
+                            return Token(KEYWORD, "<"+id+">")
                         else:
                             self.nextChar()
                             return Token(INVALID, self.ch)
