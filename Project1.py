@@ -2,6 +2,9 @@
 # PSU ID: cjk6056
 # purpose of file:
 
+# imports
+import sys
+
 # global constants
 STRING, KEYWORD, EOI, INVALID = 1, 2, 3, 4
 LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -95,6 +98,95 @@ class Lexer:
         else: return False
 
 
+class Parser:
+    def __init__(self, s):
+        self.lexer = Lexer(s+"$")
+        self.token = self.lexer.nextToken()
+
+    def run(self):
+        self.webpage()
+
+    def webpage(self):
+        if self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "<body>":
+            print(self.token.getTokenValue())
+            self.token = self.lexer.nextToken()
+            while self.token.getTokenValue() != "</body>" or self.token.getTokenType() not in [STRING, KEYWORD]:
+                self.text(1)
+            if self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "</body>":
+                print(self.token.getTokenValue())
+                self.token = self.lexer.nextToken()
+                if self.token.getTokenType() == EOI:
+                    print("")
+                    # end of run(); everything was successful
+                else:
+                    self.error("Syntax error: expecting EOI; saw:")
+            else:
+                self.error("Syntax error: expecting KEYWORD with value </body>; saw:")
+        else:
+            self.error("Syntax error: expecting KEYWORD with value <body>; saw:")
+
+    def text(self,indentVal):
+        indentation = "  " * indentVal
+        if self.token.getTokenType() == STRING:
+            print(indentation + self.token.getTokenValue())
+            self.token = self.lexer.nextToken()
+        elif self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "<b>":
+            print(indentation + self.token.getTokenValue())
+            self.token = self.lexer.nextToken()
+            self.text(indentVal+1)
+            if self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "</b>":
+                print(indentation + self.token.getTokenValue())
+                self.token = self.lexer.nextToken()
+            else:
+                self.error("Syntax error: expecting KEYWORD with value </b>; saw:")
+        elif self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "<i>":
+            print(indentation + self.token.getTokenValue())
+            self.token = self.lexer.nextToken()
+            self.text(indentVal+1)
+            if self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "</i>":
+                print(indentation + self.token.getTokenValue())
+                self.token = self.lexer.nextToken()
+            else:
+                self.error("Syntax error: expecting KEYWORD with value </i>; saw:")
+        elif self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "<ul>":
+            print(self.token.getTokenValue())
+            self.token = self.lexer.nextToken()
+            while self.token.getTokenValue() != "</ul>" or self.token.getTokenType() not in [STRING, KEYWORD]:
+                self.listItem(indentVal+1)
+            if self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "</ul>":
+                print(self.token.getTokenValue())
+                self.token = self.lexer.nextToken()
+            else:
+                self.error("Syntax error: expecting KEYWORD with value </ul>; saw:")
+        else:
+            self.error("Syntax error: expecting token of type STRING or; saw:")
+
+    def listItem(self,indentVal):
+        indentation = "  " * indentVal
+        if self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "<li>":
+            print(indentation + self.token.getTokenValue())
+            self.token = self.lexer.nextToken()
+            self.text(indentVal+1)
+            if self.token.getTokenType() == KEYWORD and self.token.getTokenValue() == "</li>":
+                print(indentation + self.token.getTokenValue())
+                self.token = self.lexer.nextToken()
+            else:
+                self.error("Syntax error: expecting KEYWORD with value <li>; saw:")
+        else:
+            self.error("Syntax error: expecting KEYWORD with value </li>; saw:")
+
+    def matchTokenType(self, tp):
+        val = self.token.getTokenValue()
+        if (self.token.getTokenType() == tp):
+            self.token = self.lexer.nextToken()
+        else: self.error(tp)
+        return val
+
+    def error(self,msg):
+        print(msg+str(self.token))
+        sys.exit(1)
+
+
 print("Testing the lexer: test 1")
 lex = Lexer ("<body> </body> <b> </b> <i> </i> <ul> </ul> <li> </li>$")
 tk = lex.nextToken()
@@ -126,3 +218,7 @@ while (tk.getTokenType() != EOI):
     print(tk)
     tk = lex.nextToken()
 print("")
+
+print("Testing the parser: test 1")
+parser = Parser ("<body> google <b><i><b> yahoo</b></i></b></body>")
+parser.run()
